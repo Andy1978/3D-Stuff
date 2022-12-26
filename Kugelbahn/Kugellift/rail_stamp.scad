@@ -1,7 +1,9 @@
-module rail_stamp()
+module rail_stamp(rinne_offset = 0.01)
 {
 // Design so, dass 0,0,0 die Mitte der Rinne,
-// Außenkante Sechseck, "Oberfläche Standardteil" ist.
+// Außenkante Sechseck, Oberfläche ist.
+// Mit rinne_offset kann der Zylinder für die Rinne
+// über das Minimum hinaus verlängert werden
 
 // Fix, bzw. durch die Geometrie des Spiels vorgegeben
 D_Kugel   = 12.8; // mm
@@ -31,5 +33,5 @@ for (k = [-1:2:1])
 }
 translate ([0, 0, D_Rinne/2 - h_Rinne]) // Oberfläche bei z = 0
   rotate ([-90, 0, 0])
-    cylinder (h = 10 + 0.01, d = D_Rinne);
+    cylinder (h = 10 + rinne_offset, d = D_Rinne);
 }
