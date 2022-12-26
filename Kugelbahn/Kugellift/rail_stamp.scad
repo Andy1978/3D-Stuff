@@ -5,6 +5,8 @@ module rail_stamp(rinne_offset = 0.01)
 // Mit rinne_offset kann der Zylinder für die Rinne
 // über das Minimum hinaus verlängert werden
 
+noff = 1;  // auch ein Offset, allerdings wird der nach hinten freigeschnitten (für moderate Neigungen)
+
 // Fix, bzw. durch die Geometrie des Spiels vorgegeben
 D_Kugel   = 12.8; // mm
 D_Rinne   = 13.8; // mm
@@ -28,10 +30,10 @@ for (k = [-1:2:1])
   translate([cube_x, s_rand, -t_tasche])
     cube([D_bogen, h_tasche, t_tasche]);
 
-  translate([cube_x, -0.01, -t_rand])
-    cube ([D_bogen, s_rand + 0.02, t_rand]);
+  translate([cube_x, +0.01 - noff, -t_rand])
+    cube ([D_bogen, s_rand + noff, t_rand]);
 }
-translate ([0, 0, D_Rinne/2 - h_Rinne]) // Oberfläche bei z = 0
+translate ([0, -noff, D_Rinne/2 - h_Rinne]) // Oberfläche bei z = 0
   rotate ([-90, 0, 0])
-    cylinder (h = 10 + rinne_offset, d = D_Rinne);
+    cylinder (h = 10 + rinne_offset + noff, d = D_Rinne);
 }

@@ -4,7 +4,7 @@ use <hexagon.scad>
 $fa = 1;
 $fs = 0.4;
 
-h_Hexagon_aussen = 59.7;
+h_Hexagon_aussen = 60;
 
 difference ()
 {
@@ -16,5 +16,5 @@ translate ([0, 0, 1.6])
 for (k = [0:2])
   rotate ([0, 0, 120 * k])
     translate ([0, -30, 10])
-      rail_stamp (40);
+      rail_stamp (rinne_offset = 40);
 }
