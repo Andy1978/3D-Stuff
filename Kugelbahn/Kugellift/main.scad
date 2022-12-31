@@ -7,16 +7,14 @@
   ohne support gedruckt werden können.
   
  */
-use <spring.scad>
 use <hexagon.scad>
 use <rinne.scad>
 use <rail_stamp.scad>
 use <zahnrad.scad>
 use <liftarm.scad>
-//use <liftarm_loch.scad>
 use <kreuzstange.scad>
-$fa = 1;
-$fs = 0.4;
+//$fa = 1;
+//$fs = 0.4;
 eps = 0.005;
 
 debug_slice = 0;  // Schnitt fürs debugging
@@ -29,20 +27,19 @@ sim_rot = 740;//2 * 360 + 90 * $t; // Animation
 
 /**** Parameter ****/
 
-D_zyl = 38; // Durchmesser des inneren Zylinders/Rotors
-h_zyl = 73; // Höhe        des inneren Zylinders/Rotors
+D_zyl = 42; // Durchmesser des inneren Zylinders/Rotors
+h_zyl = 72; // Höhe        des inneren Zylinders/Rotors
 
 // Fix, bzw. durch die Geometrie des Spiels vorgegeben
 D_Kugel   = 12.8; // mm
 D_Rinne   = 13.8; // mm
-h_Rinne   = 5.9;  // Rinnentiefe in mm
 //s_Hexagon = 2 * sqrt(60^2 - 30^2);// = 103.92 Hexagon vertikale Wiederholung
 h_Hexagon_innen  = 29.8; // Höhe des Lochs
 h_Hexagon_aussen = 59.7;
 
 // Mantel
 h_Hex   = 78;  // Höhe äußeres Hexagon
-s_gap   = 2.5;   // Spalt zwischen innerem Zylinder und mittlerer Bohrung
+s_gap   = 0.5;   // Spalt zwischen innerem Zylinder und mittlerer Bohrung
 t_Boden = 5;   // Dicke des Sockels in der Mitte, die 5 sind bisher eher ausprobiert...
 
 // Abstand der Gewindegänge muss ja mindestens D_Kugel sein
@@ -57,7 +54,7 @@ union() {
 
 
 // feststehendes Teil
-difference ()
+*difference ()
 {
   union ()
   {
@@ -138,9 +135,10 @@ difference ()
 
 }
 
-// Rotor senkrechten Rinnen
+// Rotor mit senkrechten Rinnen
 // Radius des Zentrums der Kugelrinne am inneren Zyl.
-radius_Rinne = D_zyl/2 - h_Rinne + D_Rinne/2; 
+radius_Rinne = 20; // früher D_zyl/2 - 5.9 + D_Rinne/2; 
+
 translate ([0, 0, 5.1])
     rotate ([0, 0, sim_rot + 30])
         difference ()
@@ -160,6 +158,7 @@ translate ([0, 0, 5.1])
               kreuzstange (15, 0.1);
        } 
 
+/*
 // Liftarm
 rotate ([0, 0, 60])
   translate ([-4 * 8, 0, t_Boden + h_zyl + 0.1])
@@ -180,13 +179,13 @@ rotate ([0, 0, -120])
       cylinder (h = 15.7, d = 10, center = true);
       cylinder (h = 80, d = 4.75, center = true); // Kreuzstange
     }
-        
+*/
+
 // mal eine Kugel einzeichnen
 z_Kugel = sim_rot/360 * pitch - (D_Rinne - D_Kugel) + 10.7;
-*rotate ([0, 0, 270 + sim_rot])
-  translate ([D_zyl/2 - h_Rinne + D_Kugel/2, 0, z_Kugel])
+rotate ([0, 0, 270 + sim_rot])
+  translate ([radius_Rinne - (D_Rinne - D_Kugel)/2, 0, z_Kugel])
     sphere (d = D_Kugel);
-
 }  // union
 
 if (debug_slice)
