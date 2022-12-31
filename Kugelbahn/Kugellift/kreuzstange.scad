@@ -1,7 +1,7 @@
-module kreuzstange (h)
+module kreuzstange (h, offset = 0)
 {
-  D = 4.75;
-  w = 1.8;
+  D = 4.75 + offset;
+  w = 1.8 + offset;
   difference ()
   {
     cylinder (h = h, d = D);
@@ -11,4 +11,5 @@ module kreuzstange (h)
           cube ([5, 5, h + 0.2]);
   } 
 }
-//kreuzstange (50);
+
+kreuzstange (10, 0.1);

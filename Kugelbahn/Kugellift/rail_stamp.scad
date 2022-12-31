@@ -37,3 +37,18 @@ translate ([0, -noff, D_Rinne/2 - h_Rinne]) // Oberfläche bei z = 0
   rotate ([-90, 0, 0])
     cylinder (h = 10 + rinne_offset + noff, d = D_Rinne);
 }
+
+// Example
+use <hexagon.scad>
+difference ()
+{
+  hexagon (h = 10, s = 60);
+
+translate ([0, 0, 1.6])
+  hexagon (h = 10, s = 40); // grob innen
+
+for (k = [0:2])
+  rotate ([0, 0, 120 * k])
+    translate ([0, -30, 10])
+      rail_stamp (rinne_offset = 40);
+}

@@ -2,29 +2,35 @@
   Versuch eines Kugellifts
   Das innere Teil soll später durch einen kleinen Getriebemotor
   angetrieben werden
+  
+  Variante 2 mit Fokus darauf, dass beide Teile stehend
+  ohne support gedruckt werden können.
+  
  */
 use <spring.scad>
 use <hexagon.scad>
+use <rinne.scad>
 use <rail_stamp.scad>
 use <zahnrad.scad>
 use <liftarm.scad>
-use <liftarm_loch.scad>
+//use <liftarm_loch.scad>
 use <kreuzstange.scad>
 $fa = 1;
 $fs = 0.4;
 eps = 0.005;
 
-debug_slice = 1;  // Schnitt fürs debugging
+debug_slice = 0;  // Schnitt fürs debugging
 
 //$t = 1;
 //sim_rot = 2 * 360;
-sim_rot = 0;//2 * 360 + 90 * $t; // Animation
+sim_rot = 740;//2 * 360 + 90 * $t; // Animation
 // 875 ist direkt unter dem Liftarm
+// 1019 ist ganz oben
 
 /**** Parameter ****/
 
 D_zyl = 38; // Durchmesser des inneren Zylinders/Rotors
-h_zyl = 55; // Höhe        des inneren Zylinders/Rotors
+h_zyl = 73; // Höhe        des inneren Zylinders/Rotors
 
 // Fix, bzw. durch die Geometrie des Spiels vorgegeben
 D_Kugel   = 12.8; // mm
@@ -35,8 +41,8 @@ h_Hexagon_innen  = 29.8; // Höhe des Lochs
 h_Hexagon_aussen = 59.7;
 
 // Mantel
-h_Hex   = 60;  // Höhe äußeres Hexagon
-s_gap   = 1;   // Spalt zwischen innerem Zylinder und mittlerer Bohrung
+h_Hex   = 78;  // Höhe äußeres Hexagon
+s_gap   = 2.5;   // Spalt zwischen innerem Zylinder und mittlerer Bohrung
 t_Boden = 5;   // Dicke des Sockels in der Mitte, die 5 sind bisher eher ausprobiert...
 
 // Abstand der Gewindegänge muss ja mindestens D_Kugel sein
@@ -60,14 +66,16 @@ difference ()
 
   // Verstärkungen für die Löcher
   rotate ([0, 0, 60])
+  {
     for (k = [-4, 4])
       translate ([k * 8, 0, t_Boden + h_zyl])
         rotate ([0, 180, 0])
           {
-            cylinder(h = 7, d = 10);
+            cylinder(h = 7, d = 8);
             translate ([0, 0, 7])
-              cylinder(h = 15, d1 = 10, d2 = 0);
+              cylinder(h = 10, d1 = 8, d2 = 2);
            }
+   }
    }
 
   // Aussparung für adapter1.FCStd zur Grundplatte
@@ -81,20 +89,27 @@ difference ()
 
   // zentrale Bohrung, in der später der Rotor läuft
   translate ([0, 0, t_Boden])
-    cylinder(h = h_Hex + eps, d = D_zyl + 2 * s_gap);  
+    cylinder(h = h_Hex + eps, d = D_zyl + 2 * s_gap);
+  //echo (D_zyl + 2 * s_gap);  
 
   // Führung der Kreuzstange des Rotors
   translate ([0, 0, -0.05])
     cylinder(h = t_Boden + 0.1, d = 4.75);  
 
   // Spindel im Mantel
-  h_spring = h_Hex - 8;
   // die -8 sind ausprobiert, bis die Spindel zum Auslauf passt
-  translate ([0, 0, 10])
-    rotate ([0, 0, 270 - 8])
-      spring (h = h_spring, d_coil = D_Rinne,
-              r_spring = radius_Rinne + 0.1,
-              pitch = pitch, n = 150);
+  h_spring = h_Hex - 8;
+
+  translate ([0, 0, 2.6])
+    rotate ([0, 0, 270 - 15])
+      rinne (r = radius_Rinne + D_Kugel/2 + 0.3,
+             ri = D_zyl/2 - 6,
+             h = h_spring,
+             t = 5.4,
+             pitch = pitch,
+             fn = 80);
+
+  //rinne (r = 27, ri = 20, h = 50, t = 5.4, pitch = 18);
 
   // Kugeleinlauf unten, von -y her kommend
   translate ([0, -30, 10])
@@ -107,21 +122,18 @@ difference ()
        rotate ([3, 0, 0])
          rail_stamp (1.5);
 
-  // zwei Löcher in den Verstärkungen
-  // das ist bissle unschön doppelter Code mit den Verschiebungen
-  // FIXME: Ich muss recherchieren, wie man eine Kette mit Translate + rotate in eine Funktion auslagern kann
-
+  // 4 Löcher für Kreuzstangen
   rotate ([0, 0, 60])
    {
     for (k = [-4, 4])
-      translate ([k * 8, 0, t_Boden + h_zyl])
+      translate ([k * 8, 0, t_Boden + h_zyl + 0.01])
         rotate ([0, 180, 0])
-           liftarm_loch ();
+           kreuzstange (9, 0.1);
 
     for (k = [-2, 2])
-      translate ([k * 8, -3*8, t_Boden + h_zyl])
+      translate ([k * 8, -3*8, t_Boden + h_zyl + 0.01])
         rotate ([0, 180, 0])
-           liftarm_loch ();
+           kreuzstange (9, 0.2);
     }
 
 }
@@ -129,7 +141,7 @@ difference ()
 // Rotor senkrechten Rinnen
 // Radius des Zentrums der Kugelrinne am inneren Zyl.
 radius_Rinne = D_zyl/2 - h_Rinne + D_Rinne/2; 
-*translate ([0, 0, 5.1])
+translate ([0, 0, 5.1])
     rotate ([0, 0, sim_rot + 30])
         difference ()
         {
@@ -142,14 +154,14 @@ radius_Rinne = D_zyl/2 - h_Rinne + D_Rinne/2;
 
             // Kreuzstange oben für das Zahnrad
             translate ([0, 0, h_zyl- 9.9])
-              kreuzstange (10);
+              kreuzstange (10, 0.1);
             // Kreuzstange unten für die Zentrieung
             translate ([0, 0, -0.01])
-              kreuzstange (15);
+              kreuzstange (15, 0.1);
        } 
 
 // Liftarm
-*rotate ([0, 0, 60])
+rotate ([0, 0, 60])
   translate ([-4 * 8, 0, t_Boden + h_zyl + 0.1])
     {  
      liftarm (9);
@@ -158,10 +170,10 @@ radius_Rinne = D_zyl/2 - h_Rinne + D_Rinne/2;
     }
 
 // Zahnrad auf dem Liftarm
-*translate ([0, 0, t_Boden + h_zyl + 0.1 + 8])
+translate ([0, 0, t_Boden + h_zyl + 0.1 + 8])
   zahnrad ();
 // Schnecke
-*rotate ([0, 0, -120])
+rotate ([0, 0, -120])
   translate ([0, 16, t_Boden + h_zyl + 0.1 + 12])
     rotate ([0, 90, 0])
     {
@@ -170,7 +182,7 @@ radius_Rinne = D_zyl/2 - h_Rinne + D_Rinne/2;
     }
         
 // mal eine Kugel einzeichnen
-z_Kugel = sim_rot/360 * pitch - (D_Rinne - D_Kugel) + 10;
+z_Kugel = sim_rot/360 * pitch - (D_Rinne - D_Kugel) + 10.7;
 *rotate ([0, 0, 270 + sim_rot])
   translate ([D_zyl/2 - h_Rinne + D_Kugel/2, 0, z_Kugel])
     sphere (d = D_Kugel);
@@ -179,15 +191,13 @@ z_Kugel = sim_rot/360 * pitch - (D_Rinne - D_Kugel) + 10;
 
 if (debug_slice)
 {
-hsw = 0;  // half-slice-width
-rotate ([0, 0, 60])
+hsw = 10;  // half-slice-width
+rotate ([0, 0, 90])
 {
-  // Teil2
   translate ([-45, hsw, -1])
     cube (90);
-  // Teil1
-  //translate ([-45,-90 - hsw,-1])
-  //  cube (90);
+  translate ([-45,-90 - hsw,-1])
+    cube (90);
 }
 }
 } // difference
