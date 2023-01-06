@@ -2,16 +2,16 @@
   Versuch eines Kugellifts
   Das innere Teil soll später durch einen kleinen Getriebemotor
   angetrieben werden
-  
+
   Variante 2 mit Fokus darauf, dass beide Teile stehend
   ohne support gedruckt werden können.
-  
+
  */
 include <marble_game.scad>
 use <brick_game.scad>
 use <rinne.scad>
 $fa = 1;
-$fs = 0.4;
+$fs = 0.3;
 eps = 0.005;
 
 debug_slice = 0;  // Schnitt fürs debugging
@@ -36,7 +36,7 @@ h_Hex   = 96;  // Höhe äußeres Hexagon
 t_Boden = 5;   // Dicke des Sockels in der Mitte, die 5 sind bisher eher ausprobiert...
 
 // Radius des Zentrums der Kugelrinne am inneren Zyl.
-radius_Rinne = 20; // früher D_zyl/2 - 5.9 + D_Rinne/2; 
+radius_Rinne = 20; // früher D_zyl/2 - 5.9 + D_Rinne/2;
 t_rinne      = 5.4;     // Tiefe der Rinne (Höhe des Trapezes)
 r_trapez     = radius_Rinne + D_Kugel/2 + 0.3;
 
@@ -45,7 +45,10 @@ h_zyl = h_Hex - t_Boden - 2; // Höhe des inneren Zylinders/Rotors
 // Abstand der Gewindegänge muss ja mindestens D_Kugel sein
 // aber 15mm lässt oben so wenig Material, dass man oben fast keinen
 // Auslauf einbringen kann
-pitch = 18;    
+pitch = 18;
+
+// für mein Tevo Tarantula und 0,3mm Layer angepasst
+kreuzstange_offset = 0.3;
 
 /******** Ende Parameter **************/
 
@@ -83,27 +86,30 @@ difference ()
                }
        }
       // Verlängerung für Kugeleinlauf
-      translate ([0, -h_Hexagon_aussen/2, 13])
+      l_tunnel = 10;
+      y_tunnel = 13;
+      w_tunnel = 20;
+      translate ([0, -h_Hexagon_aussen/2 + 0.01, y_tunnel])
         rotate ([90, 0, 0])
           {
-            cylinder (r = 10, h = 10); 
-            translate ([-10, -13, 0])
-              cube ([20, 13, 10]);
+            cylinder (d = w_tunnel, h = l_tunnel);
+            translate ([-w_tunnel/2, -y_tunnel, 0])
+              cube ([w_tunnel, y_tunnel, l_tunnel]);
           }
    }
 
-  // Aussparung für adapter1.FCStd zur Grundplatte
+  // Aussparung für adapter1.FCStd (2mm stark) zur Grundplatte
   translate ([0, 0, -0.01])
     difference ()
     {
-      hexagon(h = 2, s = 29.8 + 0.1);
+      hexagon(h = 2, s = h_Hexagon_innen + 0.1);
       translate ([0, 0, -0.01])
-        hexagon(h = 2.02, s = 27.3 - 0.1);
+        hexagon(h = 2.02, s = h_Hexagon_innen - 2.0 - 0.6);
     }
 
   // Führung der Kreuzstange des Rotors
   translate ([0, 0, -0.05])
-    cylinder(h = t_Boden + 0.1, d = 4.75);  
+    cylinder(h = t_Boden + 0.1, d = 4.75);
 
   // Spindel im Mantel
   // die -9 sind ausprobiert, bis die Spindel zum Auslauf passt
@@ -140,12 +146,12 @@ difference ()
     for (k = [-4, 4])
       translate ([k * 8, 0, h_Hex + 0.01])
         rotate ([0, 180, 0])
-           kreuzstange (9, 0.1);
+           kreuzstange (9, kreuzstange_offset);
 
     for (k = [-2, 2])
       translate ([k * 8, -4*8, h_Hex + 0.01])
         rotate ([0, 180, 0])
-           kreuzstange (9, 0.2);
+           kreuzstange (9, kreuzstange_offset);
     }
 
 }
@@ -153,8 +159,8 @@ difference ()
 // Rotor mit senkrechten Rinnen
 
 // Durchmesser des inneren Zylinders/Rotors
-D_zyl = 2*(r_trapez - t_rinne) - 1.0; // 0.5mm Spalt
-
+D_zyl = 2*(r_trapez - t_rinne) - 1.4; // 0.7mm Spalt
+echo (D_zyl);
 translate ([0, 0, 5.1])
     rotate ([0, 0, sim_rot + 30])
         difference ()
@@ -168,17 +174,17 @@ translate ([0, 0, 5.1])
 
             // Kreuzstange oben für das Zahnrad
             translate ([0, 0, h_zyl- 9.9])
-              kreuzstange (10, 0.1);
+              kreuzstange (10, kreuzstange_offset);
             // Kreuzstange unten für die Zentrierung
             translate ([0, 0, -0.01])
-              kreuzstange (15, 0.1);
-       } 
+              kreuzstange (15, kreuzstange_offset);
+       }
 
 /*
 // Liftarm
 rotate ([0, 0, 60])
   translate ([-4 * 8, 0, t_Boden + h_zyl + 0.1])
-    {  
+    {
      liftarm (9);
      translate ([0, -3*8, 0])
        liftarm (9);
@@ -199,7 +205,7 @@ rotate ([0, 0, -120])
 
 // mal eine Kugel einzeichnen
 z_Kugel = sim_rot/360 * pitch - (D_Rinne - D_Kugel) + 12.0;
-rotate ([0, 0, 270 + sim_rot])
+*rotate ([0, 0, 270 + sim_rot])
   translate ([radius_Rinne - (D_Rinne - D_Kugel)/2, 0, z_Kugel])
     sphere (d = D_Kugel);
 }  // union

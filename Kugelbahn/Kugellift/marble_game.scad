@@ -9,8 +9,11 @@ D_Rinne   = 13.8; // mm
 h_Rinne   = 5.9;  // Rinnentiefe in mm
 
 //s_Hexagon = 2 * sqrt(60^2 - 30^2);// = 103.92 Hexagon vertikale Wiederholung
-h_Hexagon_innen  = 29.8; // Höhe des Lochs
+h_Hexagon_innen  = 29.8; // Schlüsselweite
+r_Hexagon_innen = h_Hexagon_innen/2 * 2 / sqrt(3); // Umkreisradius
+
 h_Hexagon_aussen = 59.7;
+r_Hexagon_aussen = h_Hexagon_aussen/2 * 2 / sqrt(3); // Umkreisradius
 
 module hexagon (h = 10, s = 59.7)
 {
@@ -71,12 +74,15 @@ module demo_rail_stamp ()
 
 module base_adapter ()
 {
-    // adapter1.FCStd nachbauen
-    // FIXME: ist noch WIP
+    // Adapter zur Grundplatte, 2mm stark
     difference ()
     {
-      hexagon(h = 10, s = 29.8);
+      hexagon(h = 4, s = h_Hexagon_innen);
       translate ([0, 0, -0.01])
-        hexagon(h = 10.02, s = 27.8);
+        hexagon(h = 4.02, s = h_Hexagon_innen - 2.0);
+    for (k = [0:5])
+      rotate ([0, 0, 60 * k])
+        translate ([r_Hexagon_innen - 0.6, 0, 2])
+          cylinder (d = 5, h = 5);
     }
 }
