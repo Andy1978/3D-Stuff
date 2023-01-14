@@ -19,7 +19,22 @@ module hexagon (h = 10, s = 59.7)
 {
   r = s / 2 / cos (30);
   linear_extrude (height = h)
-    polygon ([for (phi = [0:60:360]) [r*cos(phi), r*sin(phi)]]);
+    polygon ([
+      for (phi = [0:60:360])
+         [r*cos(phi), r*sin(phi)]]);
+}
+
+module beveled_hexagon (h = 10, s = 59.7, b = 3)
+{
+  difference ()
+  {
+    r = s / 2 / cos (30);
+    hexagon (h = h, s = s);
+    for (k = [0:5])
+    rotate ([0, 0, k * 60])
+     translate ([r-b, -s/4, -s/8])
+       cube (s/2);
+  }
 }
 
 module rail_stamp(rinne_offset = 0.01)
@@ -77,12 +92,12 @@ module base_adapter ()
     // Adapter zur Grundplatte, 2mm stark
     difference ()
     {
-      hexagon(h = 4, s = h_Hexagon_innen);
+      beveled_hexagon(h = 4, s = h_Hexagon_innen, b = 1.2);
       translate ([0, 0, -0.01])
-        hexagon(h = 4.02, s = h_Hexagon_innen - 2.0);
-    for (k = [0:5])
-      rotate ([0, 0, 60 * k])
-        translate ([r_Hexagon_innen - 0.6, 0, 2])
-          cylinder (d = 5, h = 5);
+        beveled_hexagon(h = 4.02, s = h_Hexagon_innen - 2.0, b = 1.2);
+      for (k = [0:5])
+        rotate ([0, 0, 60 * k])
+          translate ([r_Hexagon_innen - 0.6, 0, 2])
+            cylinder (d = 5, h = 5);
     }
 }
