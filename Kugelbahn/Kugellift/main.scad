@@ -10,8 +10,8 @@
 include <marble_game.scad>
 use <brick_game.scad>
 use <rinne.scad>
-$fa = 1;
-$fs = 0.3;
+//$fa = 1;
+//$fs = 0.3;
 eps = 0.005;
 
 debug_slice = 0;  // Schnitt fürs debugging
@@ -22,33 +22,27 @@ sim_rot = 0;//2 * 360 + 90 * $t; // Animation
 // 875 ist direkt unter dem Liftarm
 // 1019 ist ganz oben
 
-/**** Parameter ****/
+/*** Parameter ***/
 
-// Fix, bzw. durch die Geometrie des Spiels vorgegeben
-D_Kugel   = 12.8; // mm
-D_Rinne   = 13.8; // mm
-//s_Hexagon = 2 * sqrt(60^2 - 30^2);// = 103.92 Hexagon vertikale Wiederholung
-h_Hexagon_innen  = 29.8; // Höhe des Lochs
-h_Hexagon_aussen = 59.7;
+// Steigung der Spirale in mm/Umdrehung. Muss mindestens D_Kugel sein
+// aber 15mm lässt oben so wenig Material, dass man oben fast keinen
+// Auslauf einbringen kann.
+pitch = 18;
 
 // Mantel
-h_Hex   = 96;  // Höhe äußeres Hexagon
-t_Boden = 5;   // Dicke des Sockels in der Mitte, die 5 sind bisher eher ausprobiert...
+h_Hex   = 8.2 + 5 * pitch;  // Höhe äußeres Hexagon
+t_Boden = 5;   // Dicke des Sockels in der Mitte
 
 // Radius des Zentrums der Kugelrinne am inneren Zyl.
 radius_Rinne = 20; // früher D_zyl/2 - 5.9 + D_Rinne/2;
 t_rinne      = 5.4;     // Tiefe der Rinne (Höhe des Trapezes)
 r_trapez     = radius_Rinne + D_Kugel/2 + 0.3;
 
-h_zyl = h_Hex - t_Boden - 2; // Höhe des inneren Zylinders/Rotors
-
-// Abstand der Gewindegänge muss ja mindestens D_Kugel sein
-// aber 15mm lässt oben so wenig Material, dass man oben fast keinen
-// Auslauf einbringen kann
-pitch = 18;
+// Höhe des inneren Zylinders/Rotors (2mm weniger als Maximum)
+h_zyl = h_Hex - t_Boden - 2;
 
 // für mein Tevo Tarantula und 0,3mm Layer angepasst
-kreuzstange_offset = 0.3;
+kreuzstange_offset = 0.25;
 
 /******** Ende Parameter **************/
 
@@ -85,17 +79,6 @@ difference ()
                 }
                }
        }
-      // Verlängerung für Kugeleinlauf
-      l_tunnel = 10;
-      y_tunnel = 13;
-      w_tunnel = 20;
-      translate ([0, -h_Hexagon_aussen/2 + 0.01, y_tunnel])
-        rotate ([90, 0, 0])
-          {
-            cylinder (d = w_tunnel, h = l_tunnel);
-            translate ([-w_tunnel/2, -y_tunnel, 0])
-              cube ([w_tunnel, y_tunnel, l_tunnel]);
-          }
    }
 
   // Aussparung für adapter1.FCStd (2mm stark) zur Grundplatte
@@ -113,16 +96,16 @@ difference ()
 
   // Spindel im Mantel
   // die -9 sind ausprobiert, bis die Spindel zum Auslauf passt
-  h_spring = h_Hex - 9;
+  h_spring = h_Hex - 11.2;
 
-  translate ([0, 0, 2.6])
+  translate ([0, 0, 4.8])
     rotate ([0, 0, 270 - 0])
       rinne (r = r_trapez,
              h = h_spring,
              t = t_rinne,
              pitch = pitch,
-             dr = 3,
-             alpha = 45,
+             dr = 4,
+             alpha = 90,
              fn = 80);
 
   // zentrale Bohrung, in der später der Rotor läuft
@@ -130,9 +113,9 @@ difference ()
     cylinder(h = h_Hex + eps, r = r_trapez - t_rinne + 0.01, $fn = 100);
 
   // Kugeleinlauf unten, von -y her kommend
-  translate ([0, -40, 12.1])
-     rotate ([-4, 0, 0])
-      rail_stamp (rinne_offset = 12.0);
+  translate ([0, -29.5, 11.1])
+     rotate ([-5, 0, 0])
+      rail_stamp (rinne_offset = 8.0);
 
    // Kugelauslauf oben
   rotate ([0, 0, -1 * 60])
@@ -156,11 +139,10 @@ difference ()
 
 }
 
-// Rotor mit senkrechten Rinnen
-
 // Durchmesser des inneren Zylinders/Rotors
-D_zyl = 2*(r_trapez - t_rinne) - 1.4; // 0.7mm Spalt
-echo (D_zyl);
+D_zyl = 2*(r_trapez - t_rinne) - 5; // 2.5mm Spalt
+
+// Rotor mit senkrechten Rinnen
 translate ([0, 0, 5.1])
     rotate ([0, 0, sim_rot + 30])
         difference ()
