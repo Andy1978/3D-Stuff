@@ -37,7 +37,7 @@ module beveled_hexagon (h = 10, s = 59.7, b = 3)
   }
 }
 
-module rail_stamp(rinne_offset = 0.01)
+module rail_stamp(rinne_offset = 0.01, y_cyl_offset = 2.0)
 {
 // Design so, dass 0,0,0 die Mitte der Rinne,
 // Außenkante Sechseck, Oberfläche ist.
@@ -68,7 +68,14 @@ for (k = [-1:2:1])
 }
 translate ([0, -noff, D_Rinne/2 - h_Rinne]) // Oberfläche bei z = 0
   rotate ([-90, 0, 0])
-    cylinder (h = 10 + rinne_offset + noff, d = D_Rinne);
+    {
+      hull ()
+      {  
+          cylinder (h = 10 + rinne_offset + noff, d = D_Rinne);
+          translate ([0, -y_cyl_offset, 0])
+            cylinder (h = 10 + rinne_offset + noff, d = D_Rinne);
+      }
+    }
 }
 
 module demo_rail_stamp ()

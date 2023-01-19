@@ -10,32 +10,38 @@
 include <marble_game.scad>
 use <brick_game.scad>
 use <rinne.scad>
-//$fa = 1;
-//$fs = 0.3;
+$fa = 1;
+$fs = 0.3;
+rinne_fn = 80;  // finales rendern = 80
 eps = 0.005;
 
-debug_slice = 0;  // Schnitt fürs debugging
+debug_vertical_slice   = 0;  // Schnitt fürs debugging
+debug_horizontal_slice = 0;  // Schnitt fürs debugging
 
-//$t = 1;
-//sim_rot = 2 * 360;
-sim_rot = 0;//2 * 360 + 90 * $t; // Animation
-// 875 ist direkt unter dem Liftarm
-// 1019 ist ganz oben
+debug_kugel_einlauf = 0;
+debug_kugel_klemmstellung_einlauf = 0;
+debug_kugel_klemmstellung_liftarm = 0;
+debug_kugel_auslauf = 1;
 
 /*** Parameter ***/
 
 // Steigung der Spirale in mm/Umdrehung. Muss mindestens D_Kugel sein
 // aber 15mm lässt oben so wenig Material, dass man oben fast keinen
 // Auslauf einbringen kann.
-pitch = 18;
+pitch = 23.0;
+
+// Anzahl der Rinnen am Rotor
+n_rinnen = 5;
 
 // Mantel
-h_Hex   = 8.2 + 5 * pitch;  // Höhe äußeres Hexagon
+n_rot   = 1;  // Anzahl der Windungen, typ. 1 für debugging, 5 für echten Druck
+//h_Hex   = 8.2 + 5 * pitch;  // Höhe äußeres Hexagon
+h_Hex   = 12.0 + n_rot * pitch;  // Höhe äußeres Hexagon
 t_Boden = 5;   // Dicke des Sockels in der Mitte
 
 // Radius des Zentrums der Kugelrinne am inneren Zyl.
-radius_Rinne = 20; // früher D_zyl/2 - 5.9 + D_Rinne/2;
-t_rinne      = 5.4;     // Tiefe der Rinne (Höhe des Trapezes)
+radius_Rinne = 15; // früher D_zyl/2 - 5.9 + D_Rinne/2;
+t_rinne      = 6.4;     // Tiefe der Rinne (Höhe des Trapezes in der X-Y plane)
 r_trapez     = radius_Rinne + D_Kugel/2 + 0.3;
 
 // Höhe des inneren Zylinders/Rotors (2mm weniger als Maximum)
@@ -45,6 +51,15 @@ h_zyl = h_Hex - t_Boden - 2;
 kreuzstange_offset = 0.25;
 
 /******** Ende Parameter **************/
+
+//$t = 0;
+sim_rot = debug_kugel_einlauf ? 5:
+          debug_kugel_klemmstellung_einlauf? 15:
+          debug_kugel_klemmstellung_liftarm? 2.5*60 + 360 * (n_rot - 1):
+          debug_kugel_auslauf? 5*60:
+          2 * 360 + 90 * $t; // Animation
+
+echo (sim_rot);
 
 difference () { // slice zum debuggen
 union() {
@@ -57,23 +72,23 @@ difference ()
       // Mantel
       hexagon (h = h_Hex, s = h_Hexagon_aussen);
 
-      // Verstärkungen für die Löcher
+      // Verstärkungen für die Liftarm-Pin-Kreuzlöcher
       rotate ([0, 0, 60])
       {
         for (k = [-4, 4])
           translate ([k * 8, 0, h_Hex])
             rotate ([0, 180, 0])
               {
-                cylinder(h = 7, d = 8);
+                cylinder(h = 7, d = 9);
                 translate ([0, 0, 7])
-                  cylinder(h = 10, d1 = 8, d2 = 2);
+                  cylinder(h = 10, d1 = 9, d2 = 2);
                }
         for (k = [-2, 2])
           translate ([k * 8, -4*8, h_Hex])
             rotate ([0, 180, 0])
               {
                 hull () {
-                    cylinder(h = 7, d = 8);
+                    cylinder(h = 7, d = 9);
                     translate ([0, 3, 15])
                       cylinder(h = 1, d = 1);
                 }
@@ -94,34 +109,42 @@ difference ()
   translate ([0, 0, -0.05])
     cylinder(h = t_Boden + 0.1, d = 4.75);
 
-  // Spindel im Mantel
-  // die -9 sind ausprobiert, bis die Spindel zum Auslauf passt
-  h_spring = h_Hex - 11.2;
 
+  // Spindel im Mantel
+  // Z ist ausprobiert, bis die Spindel zum Auslauf passt
+  h_spring = h_Hex - 14;
   translate ([0, 0, 4.8])
-    rotate ([0, 0, 270 - 0])
+    rotate ([0, 0, 270 - 21])
       rinne (r = r_trapez,
              h = h_spring,
              t = t_rinne,
              pitch = pitch,
-             dr = 4,
-             alpha = 90,
-             fn = 80);
+             dr = 7.5,
+             alpha = 180,
+             fn = rinne_fn);
 
   // zentrale Bohrung, in der später der Rotor läuft
   translate ([0, 0, t_Boden])
     cylinder(h = h_Hex + eps, r = r_trapez - t_rinne + 0.01, $fn = 100);
 
   // Kugeleinlauf unten, von -y her kommend
-  translate ([0, -29.5, 11.1])
-     rotate ([-5, 0, 0])
-      rail_stamp (rinne_offset = 8.0);
+  translate ([0, -29.5, 15])
+    rotate ([-4, 0, 0])  // 4° schräg
+      rail_stamp (rinne_offset = 0.0);
 
+  // "Anlauf" im Kugeleinlauf (neu seit 15.01.2023)
+/*
+  *translate([0, 0, 11.0])
+    rotate ([0, 0, -100])
+      rotate_extrude(angle = 60)
+        translate([radius_Rinne, 0, 0])
+          circle(d = D_Rinne);
+*/
    // Kugelauslauf oben
   rotate ([0, 0, -1 * 60])
-    translate ([0, -30, h_Hex - 1])
-       rotate ([3, 0, 0])
-         rail_stamp (1.5);
+    translate ([0, -30, h_Hex - 4.9])
+       rotate ([5, 0, 0])
+         rail_stamp (rinne_offset = 7, y_cyl_offset = 5);
 
   // 4 Löcher für Kreuzstangen
   rotate ([0, 0, 60])
@@ -140,17 +163,17 @@ difference ()
 }
 
 // Durchmesser des inneren Zylinders/Rotors
-D_zyl = 2*(r_trapez - t_rinne) - 5; // 2.5mm Spalt
+D_zyl = 2*(r_trapez - t_rinne) - 3.7;
 
 // Rotor mit senkrechten Rinnen
+color ("green")
 translate ([0, 0, 5.1])
-    rotate ([0, 0, sim_rot + 30])
+    rotate ([0, 0, 270 + sim_rot + (debug_kugel_klemmstellung_einlauf? 360/(2*n_rinnen):0)])
         difference ()
         {
             cylinder (h = h_zyl, d = D_zyl);
-            n = 6;
-            for (k = [0:(n-1)])
-                rotate ([0, 0, k * 360/n])
+            for (k = [0:(n_rinnen-1)])
+                rotate ([0, 0, k * 360/n_rinnen])
                     translate ([radius_Rinne, 0, -eps])
                         cylinder (h = h_zyl + 2*eps, d = D_Rinne);
 
@@ -162,18 +185,19 @@ translate ([0, 0, 5.1])
               kreuzstange (15, kreuzstange_offset);
        }
 
-/*
 // Liftarm
-rotate ([0, 0, 60])
-  translate ([-4 * 8, 0, t_Boden + h_zyl + 0.1])
-    {
-     liftarm (9);
-     translate ([0, -3*8, 0])
+if (debug_kugel_klemmstellung_liftarm)
+  rotate ([0, 0, 60])
+    translate ([-4 * 8, 0, h_Hex + 0.1])
+      {
        liftarm (9);
-    }
+       translate ([0, -3*8, 0])
+         liftarm (9);
+      }
 
+/*
 // Zahnrad auf dem Liftarm
-translate ([0, 0, t_Boden + h_zyl + 0.1 + 8])
+translate ([0, 0, h_hex + 0.1 + 8])
   zahnrad ();
 // Schnecke
 rotate ([0, 0, -120])
@@ -186,21 +210,33 @@ rotate ([0, 0, -120])
 */
 
 // mal eine Kugel einzeichnen
-z_Kugel = sim_rot/360 * pitch - (D_Rinne - D_Kugel) + 12.0;
-*rotate ([0, 0, 270 + sim_rot])
-  translate ([radius_Rinne - (D_Rinne - D_Kugel)/2, 0, z_Kugel])
-    sphere (d = D_Kugel);
+r_Kugel = debug_kugel_klemmstellung_einlauf? 20:
+          radius_Rinne - (D_Rinne - D_Kugel)/2;
+z_Kugel = debug_kugel_klemmstellung_einlauf? 16.9:
+          sim_rot/360 * pitch - (D_Rinne - D_Kugel) + 14.0;
+color ("red")
+  rotate ([0, 0, 270 + sim_rot])
+    translate ([r_Kugel, 0, z_Kugel])
+      sphere (d = D_Kugel);
+
 }  // union
 
-if (debug_slice)
-{
-hsw = 10;  // half-slice-width
-rotate ([0, 0, 90])
-{
-  translate ([-45, hsw, -1])
-    cube (90);
-  translate ([-45,-90 - hsw,-1])
-    cube (90);
-}
-}
+    if (debug_vertical_slice)
+    {
+      hsw = 10;  // half-slice-width
+      rotate ([0, 0, 90])
+      {
+        cs = 120;
+        translate ([-cs/2, hsw, -1])
+          cube (cs);
+        translate ([-cs/2,-cs - hsw,-1])
+          cube (cs);
+      }
+    }
+    if (debug_horizontal_slice)
+    {
+      sh = 16;  // slice height
+      translate ([0, 0, sh])
+        cylinder (d = 80, h = h_Hex);
+    }
 } // difference

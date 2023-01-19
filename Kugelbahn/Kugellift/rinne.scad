@@ -14,7 +14,7 @@ module rinne (r, h, t, pitch, dr = 4, alpha = 90, fn = 20)
              profile = [[0, 0],
                        [0, pitch - space],    
                        [t+ro, pitch - tan(60) * t],      
-                       [t+ro, tan(30) * t]])
+                       [t+ro, tan(45) * t]])
             for(p=[0:len(profile)-1])(
                 [
                     (profile[p][0]+ri)*cos(a),
@@ -60,5 +60,9 @@ module rinne (r, h, t, pitch, dr = 4, alpha = 90, fn = 20)
 }
 
 
-rinne (r = 27, h = 50, t = 5.4, pitch = 18, dr = 4,  alpha = 90, fn = 30);
-
+rinne (r = 21.7, h = 50, t = 5.4, pitch = 22.5, dr = 8.0,  alpha = 180, fn = 30);
+// Kugel
+rotate ([0, 0, 0])
+  translate ([28-5.3, 0, 9.8])
+    color ("red")
+      sphere (d = 12.8);
