@@ -94,17 +94,28 @@ module demo_rail_stamp ()
     }    
 }
 
-module base_adapter ()
+module base_adapter (t = 1.0)
 {
     // Adapter zur Grundplatte, 2mm stark
     difference ()
     {
       beveled_hexagon(h = 4, s = h_Hexagon_innen, b = 1.2);
       translate ([0, 0, -0.01])
-        beveled_hexagon(h = 4.02, s = h_Hexagon_innen - 2.0, b = 1.2);
+        beveled_hexagon(h = 4.02, s = h_Hexagon_innen - 2*t, b = 1.2);
       for (k = [0:5])
         rotate ([0, 0, 60 * k])
           translate ([r_Hexagon_innen - 0.6, 0, 2])
-            cylinder (d = 5, h = 5);
+            cylinder (d = 6, h = 5);
+    }
+}
+
+module base_adapter_inv (t = 1.3)
+{
+  translate ([0, 0, -0.01])
+    difference ()
+    {
+      hexagon(h = 2, s = h_Hexagon_innen + 0.1);
+      translate ([0, 0, -0.01])
+        hexagon(h = 2.02, s = h_Hexagon_innen - 2*t);
     }
 }

@@ -95,19 +95,12 @@ difference ()
        }
    }
 
-  // Aussparung für adapter1.FCStd (2mm stark) zur Grundplatte
-  translate ([0, 0, -0.01])
-    difference ()
-    {
-      hexagon(h = 2, s = h_Hexagon_innen + 0.1);
-      translate ([0, 0, -0.01])
-        hexagon(h = 2.02, s = h_Hexagon_innen - 2.0 - 0.6);
-    }
+  // Hexagon Adapter unten
+  base_adapter_inv ();
 
   // Führung der Kreuzstange des Rotors
   translate ([0, 0, -0.05])
     cylinder(h = t_Boden + 0.1, d = 4.75);
-
 
   // Spindel im Mantel
   // Z ist ausprobiert, bis die Spindel zum Auslauf passt
