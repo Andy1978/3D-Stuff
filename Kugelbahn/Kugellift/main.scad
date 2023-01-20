@@ -21,7 +21,7 @@ debug_horizontal_slice = 0;  // Schnitt fürs debugging
 debug_kugel_einlauf = 0;
 debug_kugel_klemmstellung_einlauf = 0;
 debug_kugel_klemmstellung_liftarm = 0;
-debug_kugel_auslauf = 1;
+debug_kugel_auslauf = 0;
 
 /*** Parameter ***/
 
@@ -64,7 +64,7 @@ difference () { // slice zum debuggen
 union() {
 
 // feststehendes Teil
-*difference ()
+difference ()
 {
   union ()
   {
