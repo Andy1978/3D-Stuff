@@ -7,8 +7,8 @@
   ohne support gedruckt werden können.
 
  */
-include <marble_game.scad>
-use <brick_game.scad>
+include <../marble_game.scad>
+use <../brick_game.scad>
 use <rinne.scad>
 $fa = 1;
 $fs = 0.3;
