@@ -34,8 +34,7 @@ pitch = 23.0;
 n_rinnen = 5;
 
 // Mantel
-n_rot   = 1;  // Anzahl der Windungen, typ. 1 für debugging, 5 für echten Druck
-//h_Hex   = 8.2 + 5 * pitch;  // Höhe äußeres Hexagon
+n_rot   = 5;  // Anzahl der Windungen, typ. 1 für debugging, 5 für echten Druck
 h_Hex   = 12.0 + n_rot * pitch;  // Höhe äußeres Hexagon
 t_Boden = 5;   // Dicke des Sockels in der Mitte
 
@@ -53,7 +52,7 @@ kreuzstange_offset = 0.25;
 /******** Ende Parameter **************/
 
 //$t = 0;
-sim_rot = debug_kugel_einlauf ? 5:
+sim_rot = debug_kugel_einlauf ? 0:
           debug_kugel_klemmstellung_einlauf? 15:
           debug_kugel_klemmstellung_liftarm? 2.5*60 + 360 * (n_rot - 1):
           debug_kugel_auslauf? 5*60:
@@ -65,7 +64,7 @@ difference () { // slice zum debuggen
 union() {
 
 // feststehendes Teil
-difference ()
+*difference ()
 {
   union ()
   {
@@ -89,7 +88,7 @@ difference ()
               {
                 hull () {
                     cylinder(h = 7, d = 9);
-                    translate ([0, 3, 15])
+                    translate ([0, 3, 17])
                       cylinder(h = 1, d = 1);
                 }
                }
@@ -114,7 +113,7 @@ difference ()
   // Z ist ausprobiert, bis die Spindel zum Auslauf passt
   h_spring = h_Hex - 14;
   translate ([0, 0, 4.8])
-    rotate ([0, 0, 270 - 21])
+    rotate ([0, 0, 270 - 26])
       rinne (r = r_trapez,
              h = h_spring,
              t = t_rinne,
@@ -128,9 +127,9 @@ difference ()
     cylinder(h = h_Hex + eps, r = r_trapez - t_rinne + 0.01, $fn = 100);
 
   // Kugeleinlauf unten, von -y her kommend
-  translate ([0, -29.5, 15])
+  translate ([0, -29.5, 15.2])
     rotate ([-4, 0, 0])  // 4° schräg
-      rail_stamp (rinne_offset = 0.0);
+      rail_stamp (rinne_offset = 1.0);
 
   // "Anlauf" im Kugeleinlauf (neu seit 15.01.2023)
 /*
@@ -212,9 +211,9 @@ rotate ([0, 0, -120])
 // mal eine Kugel einzeichnen
 r_Kugel = debug_kugel_klemmstellung_einlauf? 20:
           radius_Rinne - (D_Rinne - D_Kugel)/2;
-z_Kugel = debug_kugel_klemmstellung_einlauf? 16.9:
+z_Kugel = debug_kugel_klemmstellung_einlauf? 17.3:
           sim_rot/360 * pitch - (D_Rinne - D_Kugel) + 14.0;
-color ("red")
+*color ("red")
   rotate ([0, 0, 270 + sim_rot])
     translate ([r_Kugel, 0, z_Kugel])
       sphere (d = D_Kugel);
@@ -223,7 +222,7 @@ color ("red")
 
     if (debug_vertical_slice)
     {
-      hsw = 10;  // half-slice-width
+      hsw = 8;  // half-slice-width
       rotate ([0, 0, 90])
       {
         cs = 120;
