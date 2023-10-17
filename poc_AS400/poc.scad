@@ -4,7 +4,7 @@ $fs = 0.6;
 
 // Abmessungen der Grundplatte
 base_s = [20, 10, 2];
-base_r = 1; // Radius an den Kanten
+base_r = 1.0; // Radius an den Kanten
 
 // Abmessungen/Profil Arm
 arm1_s = [5, 3, 12];
@@ -20,8 +20,8 @@ difference ()
 
 minkowski ()
 {
-    union() {
-
+  union()
+  {
     // Grundplatte
     cube (base_s, center = true);
       
@@ -50,7 +50,7 @@ minkowski ()
         rotate ([90, 0, 0])
           cylinder (r = arm2_r, h = arm1_s[1], center = true);
     }
-    } // union
+  } // union
     
   sphere (r = base_r);
 }
